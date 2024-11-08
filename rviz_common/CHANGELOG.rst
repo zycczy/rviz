@@ -2,8 +2,8 @@
 Changelog for package rviz_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+12.4.9 (2024-11-09)
+-------------------
 * Handle `Tool::Finished` returned by `processKeyEvent` (`#1264 <https://github.com/ros2/rviz/issues/1264>`_)
 * Correclty load icons of panels with whitespaces in their name (`#1244 <https://github.com/ros2/rviz/issues/1244>`_)
 * Contributors: Patrick Roncagliolo
