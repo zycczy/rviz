@@ -2,8 +2,8 @@
 Changelog for package rviz_default_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+14.3.2 (2024-11-20)
+-------------------
 * include QString (`#1298 <https://github.com/ros2/rviz/issues/1298>`_)
 * Clean code for Image display (`#1271 <https://github.com/ros2/rviz/issues/1271>`_)
 * Contributors: Matthew Foran, Peng Wang

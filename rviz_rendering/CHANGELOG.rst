@@ -2,8 +2,8 @@
 Changelog for package rviz_rendering
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+14.3.2 (2024-11-20)
+-------------------
 * include QString (`#1298 <https://github.com/ros2/rviz/issues/1298>`_)
 * Use consistent conditionals in render_system.hpp (`#1294 <https://github.com/ros2/rviz/issues/1294>`_)
 * Contributors: Matthew Foran, Scott K Logan
