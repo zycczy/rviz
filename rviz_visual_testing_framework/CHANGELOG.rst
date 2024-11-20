@@ -2,6 +2,11 @@
 Changelog for package rviz_visual_testing_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* include QString (`#1298 <https://github.com/ros2/rviz/issues/1298>`_)
+* Contributors: Matthew Foran
+
 14.3.1 (2024-10-11)
 -------------------
 
