@@ -37,6 +37,7 @@
 
 #include <QList>  // NOLINT: cpplint is unable to handle the include order here
 #include <QObject>  // NOLINT: cpplint is unable to handle the include order here
+#include <QString>  // NOLINT: cpplint is unable to handle the include order here
 #include <QStringList>  // NOLINT: cpplint is unable to handle the include order here
 
 #include "rviz_common/factory/pluginlib_factory.hpp"
@@ -138,7 +139,7 @@ public:
   QStringList getToolClasses();
 
   /// Function to handle a key event.
-  void handleChar(QKeyEvent * event, RenderPanel * panel);
+  [[nodiscard]] int handleChar(QKeyEvent * event, RenderPanel * panel);
 
   PluginlibFactory<Tool> * getFactory();
 

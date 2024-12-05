@@ -30,12 +30,6 @@
 
 #include "rviz_default_plugins/displays/effort/effort_display.hpp"
 
-#include <OgreSceneNode.h>
-#include <OgreSceneManager.h>
-#include <urdf/model.h>
-
-#include <QString>
-
 #include <chrono>
 #include <cstddef>
 #include <memory>
@@ -43,12 +37,18 @@
 #include <utility>
 #include <vector>
 
+#include <OgreSceneNode.h>
+#include <OgreSceneManager.h>
+
+#include <QString>  // NOLINT: cpplint is unable to handle the include order here
+
 #include <rviz_common/validate_floats.hpp>
 
 #include <rviz_common/properties/property.hpp>
 #include <rviz_rendering/objects/effort_visual.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <rclcpp/logging.hpp>
+#include <urdf/model.hpp>
 
 using namespace std::chrono_literals;
 

@@ -53,6 +53,7 @@
 #include <QApplication>  // NOLINT: cpplint cannot handle include order here
 #include <QCursor>  // NOLINT: cpplint cannot handle include order here
 #include <QKeyEvent>  // NOLINT: cpplint cannot handle include order here
+#include <QString>  // NOLINT: cpplint cannot handle include order here
 #include <QTimer>  // NOLINT: cpplint cannot handle include order here
 #include <QWindow>  // NOLINT: cpplint cannot handle include order here
 
@@ -641,7 +642,16 @@ void VisualizationManager::handleChar(QKeyEvent * event, RenderPanel * panel)
   if (event->key() == Qt::Key_Escape) {
     Q_EMIT escapePressed();
   }
-  tool_manager_->handleChar(event, panel);
+
+  int flags = tool_manager_->handleChar(event, panel);
+
+  if (flags & Tool::Render) {
+    queueRender();
+  }
+
+  if (flags & Tool::Finished) {
+    tool_manager_->setCurrentTool(tool_manager_->getDefaultTool());
+  }
 }
 
 void VisualizationManager::notifyConfigChanged()
