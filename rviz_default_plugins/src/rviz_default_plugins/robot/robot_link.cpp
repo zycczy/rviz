@@ -92,8 +92,8 @@ using rviz_common::properties::Property;
 using rviz_common::properties::FloatProperty;
 using rviz_common::properties::QuaternionProperty;
 using rviz_common::properties::VectorProperty;
-class RosRetriever: public resource_retriever::plugins::RetrieverPlugin
 
+class RosRetriever : public resource_retriever::plugins::RetrieverPlugin
 {
 public:
   explicit RosRetriever(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr ros_iface):

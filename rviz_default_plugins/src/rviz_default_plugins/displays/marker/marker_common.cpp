@@ -31,51 +31,76 @@
 
 #include "rviz_default_plugins/displays/marker/marker_common.hpp"
 
+#include <cinttypes>
 #include <memory>
+#include <set>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#include <QString>
 #include <rclcpp/callback_group.hpp>
+#include <rclcpp/duration.hpp>
 #include <rclcpp/executors/single_threaded_executor.hpp>
 #include <resource_retriever/memory_resource.hpp>
 #include <resource_retriever/plugins/retriever_plugin.hpp>
 #include <resource_retriever/retriever.hpp>
+#include <rviz_common/display.hpp>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/properties/property.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
-#include <set>
-#include <sstream>
-#include <string>
-#include <utility>
-#include <vector>
-
-#include <QString>  // NOLINT: cpplint is unable to handle the include order here
-
-#include "rclcpp/duration.hpp"
-
-#include "rviz_common/display.hpp"
-#include "rviz_common/display_context.hpp"
-#include "rviz_common/properties/property.hpp"
-#include "rviz_common/validate_floats.hpp"
+#include <rviz_common/validate_floats.hpp>
+#include <rviz_resource_interfaces/srv/get_resource.hpp>
 
 #include "rviz_default_plugins/displays/marker/markers/marker_factory.hpp"
 
-#include <resource_retriever_msgs/srv/get_resource.hpp>
-
-class RosRetriever: public resource_retriever::plugins::RetrieverPlugin
+rclcpp::Node::SharedPtr
+get_ros_node_from(
+  const rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr & weak_ros_iface)
 {
-  using GetResource = resource_retriever_msgs::srv::GetResource;
+  auto ros_iface = weak_ros_iface.lock();
+  if (!ros_iface) {
+    throw std::invalid_argument("ROS node abstraction interface not valid");
+  }
+  return ros_iface->get_raw_node();
+}
+
+class RosResourceRetriever : public resource_retriever::plugins::RetrieverPlugin
+{
+  using GetResource = rviz_resource_interfaces::srv::GetResource;
+
+  RosResourceRetriever() = delete;
+
+  static constexpr std::string_view service_name = "/rviz/get_resource";
 
 public:
-  explicit RosRetriever(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr ros_iface):
-    ros_iface_(std::move(ros_iface))
+  explicit RosResourceRetriever(
+    rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr weak_ros_iface)
+  : ros_node_(get_ros_node_from(weak_ros_iface)),
+    logger_(ros_node_->get_logger().get_child("ros_resource_retriever"))
   {
-    auto iface = ros_iface_.lock();
-    auto raw_node = iface->get_raw_node();
-    callback_group_ = raw_node->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive, false);
-    this->client_ = raw_node->create_client<GetResource>("/get_resource", rclcpp::ServicesQoS(), callback_group_);
+    this->logger_ = ros_node_->get_logger().get_child("ros_resource_retriever");
+
+    // Create a client with a custom callback group that will not be included in the main executor.
+    callback_group_ = ros_node_->create_callback_group(
+      rclcpp::CallbackGroupType::MutuallyExclusive,
+      false);
+    this->client_ = ros_node_->create_client<GetResource>(
+      service_name.data(),
+      rclcpp::ServicesQoS(),
+      callback_group_);
+
+    // Add the callback group to the executor so we can spin on it later.
+    executor_.add_callback_group(callback_group_, ros_node_->get_node_base_interface());
   }
 
-  ~RosRetriever() override = default;
+  ~RosResourceRetriever() override = default;
 
   std::string name() override
   {
-    return "rviz_common::RosRetriever";
+    return "rviz_common::RosResourceRetriever";
   }
 
   bool can_handle(const std::string & url) override
@@ -85,55 +110,102 @@ public:
 
   resource_retriever::MemoryResourcePtr get(const std::string & url) override
   {
+    RCLCPP_DEBUG(this->logger_, "Getting resource: %s", url.c_str());
+
+    // First check for a cache hit.
+    std::string etag;
     auto it = cached_resources_.find(url);
     if (it != cached_resources_.end())
     {
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[Resource Cached]: %s", url.c_str());
-      return it->second;
+      etag = it->second.first;
+      // If the etag was not set, then the server doesn't do caching, just return what we have.
+      if (etag.empty()) {
+        RCLCPP_DEBUG(this->logger_, "Resource '%s' cached without etag, returning.", url.c_str());
+        return it->second.second;
+      }
     }
 
-    auto node = ros_iface_.lock();
-    if (nullptr == node)
-    {
-      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Could not acquire node lock");
-      return nullptr;
-    }
-
-    auto raw_node = node->get_raw_node();
-    if (nullptr == node->get_raw_node())
-    {
-      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Could not acquire raw node");
-      return nullptr;
-    }
-
+    // Request the resource with an etag, if it is set.
+    RCLCPP_DEBUG(
+      this->logger_,
+      "Requesting resource '%s'%s.",
+      url.c_str(),
+      etag.empty() ? "" : (" with etag '" + etag + "'").c_str());
     auto req = std::make_shared<GetResource::Request>();
     req->path = url;
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending request");
+    req->etag = etag;
     auto result = this->client_->async_send_request(req);
-
-    auto exec = rclcpp::executors::SingleThreadedExecutor();
-    exec.add_callback_group(callback_group_, raw_node->get_node_base_interface());
-    exec.spin_until_future_complete(result);
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Waiting done");
+    executor_.spin_until_future_complete(result);
 
     auto res = result.get();
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Result: %s", res->path.c_str());
-
-    if (res->status_code == 0)
-    {
-     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[Retrieved resource]: %s", url.c_str());
-     cached_resources_.insert({url, std::make_shared<resource_retriever::MemoryResource>(url, res->path, res->body)});
-     return cached_resources_[url];
-    }
-
-    return nullptr;
+    std::shared_ptr<resource_retriever::MemoryResource> memory_resource = nullptr;
+    switch (res->status_code) {
+      case rviz_resource_interfaces::srv::GetResource::Response::OK:
+        RCLCPP_DEBUG(
+          this->logger_,
+          "Received resource '%s' with etag '%s', caching and returning %zu bytes.",
+          res->expanded_path.c_str(),
+          res->etag.c_str(),
+          res->body.size());
+        memory_resource =
+          std::make_shared<resource_retriever::MemoryResource>(url, res->expanded_path, res->body);
+        cached_resources_.insert({url, {res->etag, memory_resource}});
+        return memory_resource;
+      case rviz_resource_interfaces::srv::GetResource::Response::NOT_MODIFIED:
+        RCLCPP_DEBUG(
+          this->logger_,
+          "Resource '%s' with etag '%s' was not modified, returning cached value.",
+          res->expanded_path.c_str(),
+          res->etag.c_str());
+        if (etag != res->etag) {
+          RCLCPP_WARN(
+            this->logger_,
+            "Unexpectedly got a different etag values ('%s' vs '%s') for resource '%s' "
+            "with a NOT_MODIFIED status_code. This will not stop the resource "
+            "from loading, but indicates some issue with the caching logic.",
+            res->expanded_path.c_str(),
+            etag.c_str(),
+            res->etag.c_str());
+        }
+        return it->second.second;
+        break;
+      case rviz_resource_interfaces::srv::GetResource::Response::ERROR:
+        RCLCPP_DEBUG(
+          this->logger_,
+          "Received an unexpected error when getting resource '%s': %s",
+          url.c_str(),
+          res->error_reason.c_str());
+        return nullptr;
+        break;
+      default:
+        RCLCPP_ERROR(
+          this->logger_,
+          "Unexpected status_code from resource ROS Service '%s' for resource '%s': %" PRId32,
+          service_name.data(),
+          url.c_str(),
+          res->status_code);
+        return nullptr;
+        break;
+    };
   }
 
 private:
-  rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr ros_iface_;
+  // It should be safe to keep a shared pointer to the node here, because this
+  // plugin will be destroyed with the resource retriever in the marker display,
+  // which should be destroyed along before the node abstraction is destroyed.
+  // Also, since we're keeping callback groups and clients around, we need to
+  // ensure the node stays around too.
+  rclcpp::Node::SharedPtr ros_node_;
   rclcpp::CallbackGroup::SharedPtr callback_group_;
   rclcpp::Client<GetResource>::SharedPtr client_;
-  std::unordered_map<std::string, resource_retriever::MemoryResourcePtr> cached_resources_;
+  rclcpp::executors::SingleThreadedExecutor executor_;
+  rclcpp::Logger logger_;
+
+  // Map of the resource path to a pair with the etag value and the memory resource that is cached.
+  std::unordered_map<
+    std::string,
+    std::pair<std::string, resource_retriever::MemoryResourcePtr>
+  > cached_resources_;
 };
 
 namespace rviz_default_plugins
@@ -147,7 +219,6 @@ MarkerCommon::MarkerCommon(rviz_common::Display * display)
   namespaces_category_ = new rviz_common::properties::Property(
     "Namespaces", QVariant(), "", display_);
   marker_factory_ = std::make_unique<markers::MarkerFactory>();
-
 }
 
 MarkerCommon::~MarkerCommon()
@@ -161,7 +232,7 @@ void MarkerCommon::initialize(rviz_common::DisplayContext * context, Ogre::Scene
   scene_node_ = scene_node;
 
   resource_retriever::RetrieverVec plugins;
-  plugins.push_back(std::make_shared<RosRetriever>(context_->getRosNodeAbstraction()));
+  plugins.push_back(std::make_shared<RosResourceRetriever>(context_->getRosNodeAbstraction()));
   for (const auto & plugin : resource_retriever::default_plugins())
   {
     plugins.push_back(plugin);
