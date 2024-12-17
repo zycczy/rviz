@@ -49,7 +49,7 @@ namespace rviz_common
 
 resource_retriever::MemoryResourcePtr getResource(const std::string & resource_path)
 {
-  printf("rviz_common::getResource: %s\n", resource_path.c_str());
+  RVIZ_COMMON_LOG_DEBUG("rviz_common::getResource() loading resource: " + resource_path);
   resource_retriever::Retriever retriever;
   return retriever.get(resource_path);
 }
