@@ -121,6 +121,7 @@ protected:
   // overrides from Display
   void onEnable() override;
   void onDisable() override;
+  void processMessage(sensor_msgs::msg::JointState::ConstSharedPtr msg) override;
 
   void load();
   void clear();
@@ -132,7 +133,6 @@ protected:
   std::string robot_description_topic_;
 
 private:
-  void processMessage(sensor_msgs::msg::JointState::ConstSharedPtr msg) override;
   void topic_callback(const std_msgs::msg::String & msg);
 
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
