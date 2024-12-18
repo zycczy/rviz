@@ -2,8 +2,8 @@
 Changelog for package rviz_default_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+14.1.6 (2024-12-18)
+-------------------
 * remove unused variable (`#1301 <https://github.com/ros2/rviz/issues/1301>`_) (`#1303 <https://github.com/ros2/rviz/issues/1303>`_)
   (cherry picked from commit f1bb35318e4d3efe6443e30e75c7bc78b505ed17)
   Co-authored-by: Alejandro Hernández Cordero <alejandro@openrobotics.org>

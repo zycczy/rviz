@@ -2,8 +2,8 @@
 Changelog for package rviz_rendering
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+14.1.6 (2024-12-18)
+-------------------
 * Use consistent conditionals in render_system.hpp (`#1294 <https://github.com/ros2/rviz/issues/1294>`_) (`#1295 <https://github.com/ros2/rviz/issues/1295>`_)
   These header files define the XVisualInfo type, which is used later in
   this header based on different conditionals. In particular, the
