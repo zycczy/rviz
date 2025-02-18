@@ -113,7 +113,7 @@ public:
     return true;
   }
 
-  resource_retriever::MemoryResourcePtr get(const std::string & url) override
+  resource_retriever::MemoryResourceSharedPtr get_shared(const std::string & url) override
   {
     printf("Trying to get %s\n", url.c_str());
     return nullptr;
@@ -839,7 +839,7 @@ void RobotLink::loadMaterialFromTexture(
 {
   std::string filename = visual->material->texture_filename;
   if (!Ogre::TextureManager::getSingleton().resourceExists(filename, RVIZ_RESOURCE_GROUP)) {
-    auto res = retriever_.get(filename);
+    auto res = retriever_.get_shared(filename);
     if (nullptr != res && !res->data.empty()) {
       Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(const_cast<uint8_t*>(res->data.data()), res->data.size()));
       Ogre::Image image;

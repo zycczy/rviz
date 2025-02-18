@@ -91,7 +91,7 @@ Ogre::MeshPtr loadMeshFromResource(resource_retriever::Retriever * retriever,
   QFileInfo model_path(QString::fromStdString(resource_uri));
   std::string ext = model_path.completeSuffix().toStdString();
   if (ext == "mesh" || ext == "MESH") {
-    auto res = retriever->get(resource_uri);
+    auto res = retriever->get_shared(resource_uri);
     if (res == nullptr || res->data.empty()) {
       return nullptr;
     }

@@ -108,7 +108,7 @@ public:
     return !url.empty();
   }
 
-  resource_retriever::MemoryResourcePtr get(const std::string & url) override
+  resource_retriever::MemoryResourceSharedPtr get_shared(const std::string & url) override
   {
     RCLCPP_DEBUG(this->logger_, "Getting resource: %s", url.c_str());
 
@@ -204,7 +204,7 @@ private:
   // Map of the resource path to a pair with the etag value and the memory resource that is cached.
   std::unordered_map<
     std::string,
-    std::pair<std::string, resource_retriever::MemoryResourcePtr>
+    std::pair<std::string, resource_retriever::MemoryResourceSharedPtr>
   > cached_resources_;
 };
 

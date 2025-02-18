@@ -71,7 +71,7 @@ namespace rviz_rendering
 class ResourceIOStream : public Assimp::IOStream
 {
 public:
-  explicit ResourceIOStream(resource_retriever::MemoryResourcePtr  res)
+  explicit ResourceIOStream(resource_retriever::MemoryResourceSharedPtr res)
   : res_(res),
     pos_(res->data.data())
   {}
@@ -138,7 +138,7 @@ public:
   {}
 
 private:
-  resource_retriever::MemoryResourcePtr res_;
+  resource_retriever::MemoryResourceSharedPtr res_;
   const uint8_t * pos_;
 };
 
@@ -162,7 +162,7 @@ public:
   // Check whether a specific file exists
   bool Exists(const char * file) const override
   {
-    auto res = retriever_->get(file);
+    auto res = retriever_->get_shared(file);
     return res != nullptr;
   }
 
@@ -172,7 +172,7 @@ public:
     (void) mode;
     assert(mode == std::string("r") || mode == std::string("rb"));
 
-    auto res = retriever_->get(file);
+    auto res = retriever_->get_shared(file);
 
     if (res != nullptr) {
       // This will get freed when 'Close' is called
@@ -396,7 +396,7 @@ void AssimpLoader::loadEmbeddedTexture(
 void AssimpLoader::loadTexture(const std::string & resource_path)
 {
   if (!Ogre::TextureManager::getSingleton().resourceExists(resource_path, ROS_PACKAGE_NAME)) {
-    auto res = retriever_->get(resource_path);
+    auto res = retriever_->get_shared(resource_path);
 
     if (res == nullptr || res->data.empty())
       return;
