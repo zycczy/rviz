@@ -31,8 +31,6 @@
 
 #include "rviz_rendering/mesh_loader.hpp"
 
-#include <resource_retriever/memory_resource.hpp>
-#include <resource_retriever/plugins/retriever_plugin.hpp>
 #include <string>
 
 #include "OgreHardwareBufferManager.h"
@@ -65,6 +63,8 @@
 #include "assimp/IOSystem.h"
 #endif
 
+#include "resource_retriever/memory_resource.hpp"
+#include "resource_retriever/plugins/retriever_plugin.hpp"
 #include "resource_retriever/retriever.hpp"
 
 #include "mesh_loader_helpers/assimp_loader.hpp"
@@ -98,7 +98,8 @@ Ogre::MeshPtr loadMeshFromResource(
     }
     Ogre::MeshSerializer ser;
     Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(*res->data.data(), res->data.size()));
-    Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual(resource_uri, ROS_PACKAGE_NAME);
+    Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual(resource_uri,
+        ROS_PACKAGE_NAME);
     ser.importMesh(stream, mesh.get());
     stream->close();
     return mesh;

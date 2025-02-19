@@ -230,8 +230,7 @@ RobotLink::RobotLink(
 
   resource_retriever::RetrieverVec plugins;
   plugins.push_back(std::make_shared<RosResourceRetriever>(context_->getRosNodeAbstraction()));
-  for (const auto & plugin : resource_retriever::default_plugins())
-  {
+  for (const auto & plugin : resource_retriever::default_plugins()) {
     plugins.push_back(plugin);
   }
   retriever_ = resource_retriever::Retriever(plugins);
@@ -813,7 +812,8 @@ void RobotLink::loadMaterialFromTexture(
   if (!Ogre::TextureManager::getSingleton().resourceExists(filename, RVIZ_RESOURCE_GROUP)) {
     auto res = retriever_.get_shared(filename);
     if (nullptr != res && !res->data.empty()) {
-      Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(const_cast<uint8_t*>(res->data.data()), res->data.size()));
+      Ogre::DataStreamPtr stream(
+        new Ogre::MemoryDataStream(const_cast<uint8_t *>(res->data.data()), res->data.size()));
       Ogre::Image image;
       std::string extension =
         QFileInfo(QString::fromStdString(filename)).completeSuffix().toStdString();

@@ -34,7 +34,6 @@
 
 #include <map>
 #include <memory>
-#include <resource_retriever/retriever.hpp>
 #include <string>
 #include <vector>
 
@@ -54,8 +53,9 @@
 
 #include <urdf/model.hpp>  // can be replaced later by urdf_model/types.h
 
-#include "rviz_rendering/objects/object.hpp"
+#include "resource_retriever/retriever.hpp"
 #include "rviz_common/interaction/forwards.hpp"
+#include "rviz_rendering/objects/object.hpp"
 
 #include "rviz_default_plugins/robot/robot_element_base_class.hpp"
 #include "rviz_default_plugins/visibility_control.hpp"

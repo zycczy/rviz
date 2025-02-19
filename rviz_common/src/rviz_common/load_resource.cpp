@@ -70,8 +70,6 @@ QPixmap loadPixmap(QString url, bool fill_cache)
     if (!pixmap.loadFromData(image->data.data(), static_cast<uint32_t>(image->data.size()))) {
       RVIZ_COMMON_LOG_ERROR("Could not load pixmap " + url.toStdString());
     }
-  } else {
-    RVIZ_COMMON_LOG_ERROR("Failed to load pixmap resource at " + url.toStdString());
   }
 
   if (fill_cache) {

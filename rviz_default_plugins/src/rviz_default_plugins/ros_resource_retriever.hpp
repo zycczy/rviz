@@ -27,6 +27,9 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef RVIZ_DEFAULT_PLUGINS__ROS_RESOURCE_RETRIEVER_HPP_
+#define RVIZ_DEFAULT_PLUGINS__ROS_RESOURCE_RETRIEVER_HPP_
+
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -81,3 +84,5 @@ private:
     std::pair<std::string, resource_retriever::MemoryResourceSharedPtr>
   > cached_resources_;
 };
+
+#endif  // RVIZ_DEFAULT_PLUGINS__ROS_RESOURCE_RETRIEVER_HPP_

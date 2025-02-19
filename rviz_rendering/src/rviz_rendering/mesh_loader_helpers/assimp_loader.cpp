@@ -82,7 +82,7 @@ public:
   {
     size_t to_read = size * count;
     if (pos_ + to_read > res_->data.data() + res_->data.size()) {
-      to_read = res_->data.size()- (pos_ - res_->data.data());
+      to_read = res_->data.size() - (pos_ - res_->data.data());
     }
 
     memcpy(buffer, pos_, to_read);
@@ -401,7 +401,7 @@ void AssimpLoader::loadTexture(const std::string & resource_path)
     }
 
     Ogre::DataStreamPtr stream(
-      new Ogre::MemoryDataStream(const_cast<uint8_t*>(res->data.data()), res->data.size()));
+      new Ogre::MemoryDataStream(const_cast<uint8_t *>(res->data.data()), res->data.size()));
     Ogre::Image image;
     QFileInfo resource_path_finfo(QString::fromStdString(resource_path));
     std::string extension = resource_path_finfo.completeSuffix().toStdString();

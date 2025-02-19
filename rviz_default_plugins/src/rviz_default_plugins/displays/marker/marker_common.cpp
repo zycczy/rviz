@@ -39,7 +39,7 @@
 #include <utility>
 #include <vector>
 
-#include <QString>
+#include "QString"
 
 #include "rclcpp/duration.hpp"
 
@@ -77,8 +77,7 @@ void MarkerCommon::initialize(rviz_common::DisplayContext * context, Ogre::Scene
 
   resource_retriever::RetrieverVec plugins;
   plugins.push_back(std::make_shared<RosResourceRetriever>(context_->getRosNodeAbstraction()));
-  for (const auto & plugin : resource_retriever::default_plugins())
-  {
+  for (const auto & plugin : resource_retriever::default_plugins()) {
     plugins.push_back(plugin);
   }
   retriever_ = resource_retriever::Retriever(plugins);

@@ -27,9 +27,10 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "./ros_resource_retriever.hpp"
+#include "ros_resource_retriever.hpp"
 
 #include <cinttypes>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -94,8 +95,7 @@ RosResourceRetriever::get_shared(const std::string & url)
   // First check for a cache hit.
   std::string etag;
   auto it = cached_resources_.find(url);
-  if (it != cached_resources_.end())
-  {
+  if (it != cached_resources_.end()) {
     etag = it->second.first;
     // If the etag was not set, then the server doesn't do caching, just return what we have.
     if (etag.empty()) {
@@ -165,5 +165,5 @@ RosResourceRetriever::get_shared(const std::string & url)
         res->status_code);
       return nullptr;
       break;
-  };
+  }
 }
