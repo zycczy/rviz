@@ -145,11 +145,9 @@ private:
 class ResourceIOSystem final : public Assimp::IOSystem
 {
 public:
-  explicit ResourceIOSystem(resource_retriever::Retriever * retriever):
-    retriever_(retriever)
-  {
-  }
-
+  explicit ResourceIOSystem(resource_retriever::Retriever * retriever)
+  : retriever_(retriever)
+  {}
 
   ~ResourceIOSystem() override = default;
 
@@ -179,7 +177,7 @@ public:
       return new ResourceIOStream(res);
     }
 
-  return nullptr;
+    return nullptr;
   }
 
   void Close(Assimp::IOStream * stream) override
@@ -191,8 +189,8 @@ private:
   resource_retriever::Retriever * retriever_;
 };
 
-AssimpLoader::AssimpLoader(resource_retriever::Retriever * retriever):
-  retriever_(retriever),
+AssimpLoader::AssimpLoader(resource_retriever::Retriever * retriever)
+: retriever_(retriever),
   importer_(std::make_unique<Assimp::Importer>())
 {
   importer_->SetIOHandler(new ResourceIOSystem(retriever_));
@@ -398,10 +396,12 @@ void AssimpLoader::loadTexture(const std::string & resource_path)
   if (!Ogre::TextureManager::getSingleton().resourceExists(resource_path, ROS_PACKAGE_NAME)) {
     auto res = retriever_->get_shared(resource_path);
 
-    if (res == nullptr || res->data.empty())
+    if (res == nullptr || res->data.empty()) {
       return;
+    }
 
-    Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(const_cast<uint8_t*>(res->data.data()), res->data.size()));
+    Ogre::DataStreamPtr stream(
+      new Ogre::MemoryDataStream(const_cast<uint8_t*>(res->data.data()), res->data.size()));
     Ogre::Image image;
     QFileInfo resource_path_finfo(QString::fromStdString(resource_path));
     std::string extension = resource_path_finfo.completeSuffix().toStdString();

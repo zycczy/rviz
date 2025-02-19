@@ -66,10 +66,12 @@ QPixmap loadPixmap(QString url, bool fill_cache)
   RVIZ_COMMON_LOG_DEBUG("Load pixmap at " + url.toStdString());
 
   auto image = getResource(url.toStdString());
-  if (image!= nullptr && !image->data.empty()) {
+  if (image != nullptr && !image->data.empty()) {
     if (!pixmap.loadFromData(image->data.data(), static_cast<uint32_t>(image->data.size()))) {
       RVIZ_COMMON_LOG_ERROR("Could not load pixmap " + url.toStdString());
     }
+  } else {
+    RVIZ_COMMON_LOG_ERROR("Failed to load pixmap resource at " + url.toStdString());
   }
 
   if (fill_cache) {

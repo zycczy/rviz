@@ -35,7 +35,6 @@
 #include <map>
 #include <memory>
 #include <mutex>
-#include <resource_retriever/retriever.hpp>
 #include <set>
 #include <string>
 #include <vector>
@@ -45,6 +44,7 @@
 
 #include <QString>  // NOLINT: cpplint is unable to handle the include order here
 
+#include "resource_retriever/retriever.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 

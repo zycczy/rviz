@@ -78,6 +78,8 @@
 #include "rviz_common/properties/vector_property.hpp"
 #include "rviz_common/interaction/selection_manager.hpp"
 
+#include "../ros_resource_retriever.hpp"
+
 #define RVIZ_RESOURCE_GROUP "rviz_rendering"
 
 using rviz_rendering::Axes;
@@ -92,36 +94,6 @@ using rviz_common::properties::Property;
 using rviz_common::properties::FloatProperty;
 using rviz_common::properties::QuaternionProperty;
 using rviz_common::properties::VectorProperty;
-
-class RosRetriever : public resource_retriever::plugins::RetrieverPlugin
-{
-public:
-  explicit RosRetriever(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr ros_iface):
-    ros_iface_(std::move(ros_iface))
-  {
-  }
-
-  ~RosRetriever() override {};
-
-  std::string name() override
-  {
-    return "rviz_common::RosRetriever";
-  }
-
-  bool can_handle(const std::string & url) override
-  {
-    return true;
-  }
-
-  resource_retriever::MemoryResourceSharedPtr get_shared(const std::string & url) override
-  {
-    printf("Trying to get %s\n", url.c_str());
-    return nullptr;
-  }
-
-private:
-    rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr ros_iface_;
-};
 
 class RobotLinkSelectionHandler : public rviz_common::interaction::SelectionHandler
 {
@@ -257,7 +229,7 @@ RobotLink::RobotLink(
     rviz_rendering::MaterialManager::createMaterialWithLighting(color_material_name);
 
   resource_retriever::RetrieverVec plugins;
-  plugins.push_back(std::make_shared<RosRetriever>(context_->getRosNodeAbstraction()));
+  plugins.push_back(std::make_shared<RosResourceRetriever>(context_->getRosNodeAbstraction()));
   for (const auto & plugin : resource_retriever::default_plugins())
   {
     plugins.push_back(plugin);

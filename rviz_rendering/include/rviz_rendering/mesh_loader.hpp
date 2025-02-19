@@ -41,9 +41,12 @@
 
 namespace rviz_rendering
 {
+
 RVIZ_RENDERING_PUBLIC
-Ogre::MeshPtr loadMeshFromResource(resource_retriever::Retriever * retriever,
-                                   const std::string & resource_uri);
+Ogre::MeshPtr loadMeshFromResource(
+  resource_retriever::Retriever * retriever,
+  const std::string & resource_uri);
+
 }  // namespace rviz_rendering
 
 #endif  // RVIZ_RENDERING__MESH_LOADER_HPP_

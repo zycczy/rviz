@@ -73,12 +73,13 @@
 namespace rviz_rendering
 {
 
-Ogre::MeshPtr loadMeshFromResource(resource_retriever::Retriever * retriever,
-                                   const std::string & resource_uri)
+Ogre::MeshPtr loadMeshFromResource(
+  resource_retriever::Retriever * retriever,
+  const std::string & resource_uri)
 {
-  printf("loadMeshFromResource: %s\n", resource_uri.c_str());
   // Early exit with empty retriever
   if (nullptr == retriever) {
+    RVIZ_RENDERING_LOG_ERROR("retriever is unexpectedly nullptr");
     return nullptr;
   }
 
